@@ -327,16 +327,10 @@ class DeepFM(BaseEstimator, TransformerMixin):
     def training_termination(self, valid_result):
         if len(valid_result) > 5:
             if self.greater_is_better:
-                if valid_result[-1] < valid_result[-2] and \
-                    valid_result[-2] < valid_result[-3] and \
-                    valid_result[-3] < valid_result[-4] and \
-                    valid_result[-4] < valid_result[-5]:
+                if all(x>y for x, y in zip(valid_result[-5:], valid_result[-4:])):
                     return True
             else:
-                if valid_result[-1] > valid_result[-2] and \
-                    valid_result[-2] > valid_result[-3] and \
-                    valid_result[-3] > valid_result[-4] and \
-                    valid_result[-4] > valid_result[-5]:
+                if all(x<y for x, y in zip(valid_result[-5:], valid_result[-4:])):
                     return True
         return False
 
@@ -348,7 +342,7 @@ class DeepFM(BaseEstimator, TransformerMixin):
         :return: predicted probability of each sample
         """
         # dummy y
-        dummy_y = [1] * len(Xi)
+        dummy_y = np.ones(len(Xi))
         batch_index = 0
         Xi_batch, Xv_batch, y_batch = self.get_batch(Xi, Xv, dummy_y, self.batch_size, batch_index)
         y_pred = None
