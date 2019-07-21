@@ -110,7 +110,7 @@ class DeepFM(BaseEstimator, TransformerMixin):
                 if self.batch_norm:
                     self.y_deep = self.batch_norm_layer(self.y_deep, train_phase=self.train_phase, scope_bn="bn_%d" %i) # None * layer[i] * 1
                 self.y_deep = self.deep_layers_activation(self.y_deep)
-                self.y_deep = tf.nn.dropout(self.y_deep, self.dropout_keep_deep[1+i]) # dropout at each Deep layer
+                self.y_deep = tf.nn.dropout(self.y_deep, self.dropout_keep_deep[i+1]) # dropout at each Deep layer
 
             # ---------- DeepFM ----------
             if self.use_fm and self.use_deep:
@@ -123,7 +123,7 @@ class DeepFM(BaseEstimator, TransformerMixin):
 
             # loss
             if self.loss_type == "logloss":
-                self.out = tf.nn.sigmoid(self.out)
+                self.out = tf.round(self.sigmoid(self.out))
                 self.loss = tf.losses.log_loss(self.label, self.out)
             elif self.loss_type == "mse":
                 self.loss = tf.nn.l2_loss(tf.subtract(self.label, self.out))
@@ -169,6 +169,9 @@ class DeepFM(BaseEstimator, TransformerMixin):
             if self.verbose > 0:
                 print("#params: %d" % total_parameters)
 
+
+    def sigmoid(self,logits):
+        return (1/(1+tf.exp(-logits)))
 
     def _init_session(self):
         config = tf.ConfigProto(device_count={"gpu": 0})
