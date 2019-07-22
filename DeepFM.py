@@ -139,7 +139,7 @@ class DeepFM(BaseEstimator, TransformerMixin):
             # optimizer
             if self.optimizer_type == "adam":
                 self.optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate, beta1=0.9, beta2=0.999,
-                                                        epsilon=1e-8).minimize(self.loss)
+                                                        epsilon=1e-3).minimize(self.loss)
             elif self.optimizer_type == "adagrad":
                 self.optimizer = tf.train.AdagradOptimizer(learning_rate=self.learning_rate,
                                                            initial_accumulator_value=1e-8).minimize(self.loss)
@@ -291,7 +291,7 @@ class DeepFM(BaseEstimator, TransformerMixin):
             if has_valid:
                 valid_result = self.evaluate(Xi_valid, Xv_valid, y_valid)
                 self.valid_result.append(valid_result)
-            if self.verbose > 0 and epoch % self.verbose == 0:
+            if self.verbose and epoch % self.verbose == 0:
                 if has_valid:
                     print("[%d] train-result=%.4f, valid-result=%.4f [%.1f s]"
                         % (epoch + 1, train_result, valid_result, time() - t1))
